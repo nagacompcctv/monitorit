@@ -1,0 +1,89 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global safe block
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() { return request.auth != null; }
+    function getUserData() { 
+      // Safe check for the user document
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid)) 
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data 
+        : {'role': 'none'}; 
+    }
+    function hasRole(role) { return isSignedIn() && getUserData().get('role', 'none') == role; }
+    function isHeadOfIT() { return hasRole('head_of_it'); }
+    function isITStaff() {
+      return isSignedIn() && (
+        getUserData().get('role', 'none') == 'head_of_it' || 
+        getUserData().get('role', 'none') == 'administrator' ||
+        getUserData().get('role', 'none') == 'supervisor' ||
+        getUserData().get('role', 'none') == 'manager' ||
+        getUserData().get('role', 'none') == 'it_admin' ||
+        getUserData().get('role', 'none') == 'staff_software' ||
+        getUserData().get('role', 'none') == 'staff_hardware'
+      );
+    }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+
+    // --- Core Collections ---
+    match /users/{userId} {
+      allow read: if true;
+      allow write: if true; // Allow public write for demo/manual login setup
+    }
+
+    match /tasks/{taskId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /assets/{assetId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /cctv-installations/{cctvId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /daily-reports/{reportId} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if true; // Reverting to public for now to avoid permission errors with manual login
+    }
+
+    match /locations/{locationId} {
+      allow read: if true;
+      allow write: if true; // Support manual login for now
+    }
+
+    match /asset_categories/{catId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /companies/{compId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /hardware_types/{typeId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /asset_histories/{historyId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /test/{docId} {
+      allow read, write: if true;
+    }
+  }
+}

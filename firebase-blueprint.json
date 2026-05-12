@@ -1,0 +1,166 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "System user with specific roles and department metadata.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["head_of_it", "administrator", "it_admin", "staff_software", "staff_hardware"] },
+        "department": { "type": "string", "enum": ["software", "hardware"] },
+        "sub_department": { "type": "string" },
+        "wa_number": { "type": "string" },
+        "performance_score": { "type": "number" }
+      },
+      "required": ["uid", "name", "email", "role"]
+    },
+    "Task": {
+      "title": "IT Work Task",
+      "description": "Individual task or project milestone.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "assigned_to": { "type": "string" },
+        "type": { "type": "string", "enum": ["project", "adhoc"] },
+        "status": { "type": "string", "enum": ["todo", "in_progress", "review", "completed", "neglected"] },
+        "progress": { "type": "number" },
+        "start_date": { "type": "string", "format": "date-time" },
+        "end_date": { "type": "string", "format": "date-time" },
+        "is_flagged": { "type": "boolean" }
+      },
+      "required": ["title", "assigned_to", "status", "progress"]
+    },
+    "Asset": {
+      "title": "IT Asset",
+      "description": "Hardware inventory item.",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["laptop", "pc", "hp", "tv"] },
+        "serial_number": { "type": "string" },
+        "model": { "type": "string" },
+        "user_id": { "type": "string" },
+        "location": { "type": "string" },
+        "status": { "type": "string", "enum": ["active", "broken", "maintenance", "storage"] }
+      },
+      "required": ["type", "serial_number", "status"]
+    },
+    "CCTVInstallation": {
+      "title": "CCTV Setup",
+      "description": "CCTV deployment details at a specific location.",
+      "type": "object",
+      "properties": {
+        "location_name": { "type": "string" },
+        "camera_count": { "type": "number" },
+        "hdd_capacity_tb": { "type": "number" },
+        "retention_days": { "type": "number" }
+      },
+      "required": ["location_name", "camera_count"]
+    },
+    "DailyReport": {
+      "title": "Daily Activity Report",
+      "description": "Daily work log submitted by staff.",
+      "type": "object",
+      "properties": {
+        "user_id": { "type": "string" },
+        "user_name": { "type": "string" },
+        "user_role": { "type": "string" },
+        "task_id": { "type": "string" },
+        "date": { "type": "string" },
+        "location": { "type": "string" },
+        "department": { "type": "string" },
+        "activities": { "type": "array", "items": { 
+          "type": "object",
+          "properties": {
+            "description": { "type": "string" },
+            "status": { "type": "string", "enum": ["DONE", "IN_PROGRESS", "PENDING"] }
+          }
+        } },
+        "result": { "type": "string", "enum": ["DONE", "IN_PROGRESS", "PENDING", "CANCELLED"] },
+        "obstacles": { "type": "string" },
+        "created_at": { "type": "string" }
+      },
+      "required": ["user_id", "date", "activities", "result", "location", "department"]
+    },
+    "Location": {
+      "title": "Operational Location",
+      "description": "Defined work location for the organization.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" }
+      },
+      "required": ["name"]
+    },
+    "AssetCategory": {
+      "title": "Asset Category",
+      "description": "Category for IT assets (e.g., Office, Produksi).",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" }
+      },
+      "required": ["name"]
+    },
+    "Company": {
+      "title": "Company Entity",
+      "description": "Company owning the assets.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" }
+      },
+      "required": ["name"]
+    },
+    "HardwareType": {
+      "title": "Hardware Type",
+      "description": "Type of hardware for IT assets (e.g., Laptop, PC, HP).",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" }
+      },
+      "required": ["name"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/tasks/{taskId}": {
+      "schema": "Task",
+      "description": "Main task board"
+    },
+    "/assets/{assetId}": {
+      "schema": "Asset",
+      "description": "Inventory management"
+    },
+    "/cctv-installations/{cctvId}": {
+      "schema": "CCTVInstallation",
+      "description": "CCTV database"
+    },
+    "/daily-reports/{reportId}": {
+      "schema": "DailyReport",
+      "description": "Daily work logs"
+    },
+    "/locations/{locationId}": {
+      "schema": "Location",
+      "description": "System locations"
+    },
+    "/asset_categories/{catId}": {
+      "schema": "AssetCategory",
+      "description": "Asset categories"
+    },
+    "/companies/{compId}": {
+      "schema": "Company",
+      "description": "Companies"
+    },
+    "/hardware_types/{typeId}": {
+      "schema": "HardwareType",
+      "description": "Hardware types"
+    }
+  }
+}
