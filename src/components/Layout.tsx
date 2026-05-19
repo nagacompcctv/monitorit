@@ -2,7 +2,7 @@ import React from 'react';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="w-full">
       {children}
     </div>
   );
@@ -20,7 +20,7 @@ export function SectionHeader({ title, description, badge }: { title: string; de
         </div>
       )}
       <h2 className="text-3xl font-bold text-gray-900 tracking-tight">{title}</h2>
-      {description && <p className="mt-2 text-gray-400 text-xs font-medium max-w-2xl">{description}</p>}
+      {description && <p className="mt-2 text-gray-400 text-xs font-medium">{description}</p>}
     </div>
   );
 }

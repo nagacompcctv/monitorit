@@ -12,14 +12,18 @@ import {
   Smartphone,
   Database,
   RefreshCw,
-  TrendingUp
+  TrendingUp,
+  Server,
+  HardDrive,
+  Shield,
+  Archive,
+  Users
 } from 'lucide-react';
 import { collection, query, onSnapshot, orderBy, limit } from 'firebase/firestore';
 import { db, auth, handleFirestoreError, OperationType } from '../lib/firebase';
 import { Task } from '../types';
 import { format } from 'date-fns';
-import { motion } from 'motion/react';
-import { seedDatabase } from '../lib/seed';
+import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
 
 export default function Dashboard() {
@@ -30,13 +34,34 @@ export default function Dashboard() {
     completed: 0,
     neglected: 0
   });
-  const [seeding, setSeeding] = useState(false);
+  
+  const [infraStats, setInfraStats] = useState({
+    physical: { total: 0, active: 0 },
+    vm: { total: 0, running: 0 },
+    backup: { total: 0, success: 0 },
+    shared: { total: 0, ok: 0 }
+  });
+
+  const [bizStats, setBizStats] = useState({
+    total: 0,
+    activeTasks: 0,
+    completedTasks: 0
+  });
+
+  const [notifications, setNotifications] = useState<any[]>([]);
 
   useEffect(() => {
     if (!auth.currentUser) return;
 
-    const q = query(collection(db, 'tasks'), orderBy('created_at', 'desc'), limit(5));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    // Subs Notifications
+    const qNotif = query(collection(db, 'mon_notifications'), orderBy('created_at', 'desc'), limit(5));
+    const unsubNotif = onSnapshot(qNotif, (snapshot) => {
+      setNotifications(snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id })));
+    });
+
+    // Subs Tasks
+    const qTasks = query(collection(db, 'tasks'), orderBy('created_at', 'desc'), limit(5));
+    const unsubTasks = onSnapshot(qTasks, (snapshot) => {
       const taskData = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Task));
       setTasks(taskData);
       
@@ -47,19 +72,47 @@ export default function Dashboard() {
         neglected: taskData.filter(t => t.status === 'neglected').length
       });
     }, (error) => {
-      if (auth.currentUser) {
-        handleFirestoreError(error, OperationType.GET, 'tasks');
-      }
+      if (auth.currentUser) handleFirestoreError(error, OperationType.GET, 'tasks');
     });
 
-    return () => unsubscribe();
-  }, [auth.currentUser?.uid]);
+    // Subs Infra
+    const unsubPhysical = onSnapshot(collection(db, 'mon_physical'), snap => {
+      const docs = snap.docs.map(d => d.data());
+      setInfraStats(prev => ({ ...prev, physical: { total: docs.length, active: docs.filter(d => d.status?.toLowerCase() === 'active').length } }));
+    });
+    const unsubVM = onSnapshot(collection(db, 'mon_vm'), snap => {
+      const docs = snap.docs.map(d => d.data());
+      setInfraStats(prev => ({ ...prev, vm: { total: docs.length, running: docs.filter(d => d.status?.toLowerCase() === 'running').length } }));
+    });
+    const unsubBackup = onSnapshot(collection(db, 'mon_backup'), snap => {
+      const docs = snap.docs.map(d => d.data());
+      setInfraStats(prev => ({ ...prev, backup: { total: docs.length, success: docs.filter(d => d.status?.toLowerCase() !== 'failed' && d.result?.toLowerCase() === 'success').length } }));
+    });
+    const unsubShared = onSnapshot(collection(db, 'mon_shared'), snap => {
+      const docs = snap.docs.map(d => d.data());
+      setInfraStats(prev => ({ ...prev, shared: { total: docs.length, ok: docs.filter(d => d.status?.toLowerCase() === 'ok').length } }));
+    });
 
-  const runSeed = async () => {
-    setSeeding(true);
-    await seedDatabase();
-    setSeeding(false);
-  };
+    // Subs Biz Process
+    const unsubBiz = onSnapshot(collection(db, 'mon_bizprocess'), snap => {
+      const docs = snap.docs.map(d => d.data());
+      setBizStats({
+        total: docs.length,
+        activeTasks: docs.reduce((acc, curr) => acc + (Number(curr.tasks_active) || 0), 0),
+        completedTasks: docs.reduce((acc, curr) => acc + (Number(curr.tasks_completed) || 0), 0)
+      });
+    });
+
+    return () => {
+      unsubNotif();
+      unsubTasks();
+      unsubPhysical();
+      unsubVM();
+      unsubBackup();
+      unsubShared();
+      unsubBiz();
+    };
+  }, [auth.currentUser?.uid]);
 
   return (
     <div className="space-y-10">
@@ -81,16 +134,6 @@ export default function Dashboard() {
              <span className="text-[9px] font-bold text-gray-300 uppercase">Pembaruan Terakhir</span>
              <span className="text-xs font-bold text-gray-900">{format(new Date(), 'HH:mm:ss')}</span>
           </div>
-          {tasks.length === 0 && (
-            <button 
-              onClick={runSeed}
-              disabled={seeding}
-              className="flex items-center gap-3 bg-gray-900 text-white px-6 py-3 rounded-xl font-bold text-xs shadow-xl shadow-gray-900/20 hover:scale-105 transition-all disabled:opacity-50 border border-gray-800"
-            >
-              <Database className="w-4 h-4 text-blue-400" />
-              {seeding ? 'GENERATING...' : 'INIT SAMPLE DATA'}
-            </button>
-          )}
           <button className="p-3 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all text-gray-400">
              <RefreshCw className="w-4 h-4" />
           </button>
@@ -99,36 +142,36 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard 
-          label="Proyek Aktif" 
-          value={stats.active} 
-          icon={Activity} 
-          trend="+12.5%" 
+          label="Server Fisik Aktif" 
+          value={`${infraStats.physical.active}/${infraStats.physical.total}`} 
+          icon={Shield} 
+          trend={infraStats.physical.active === infraStats.physical.total ? "All Good" : "Needs Attn"} 
+          color="text-indigo-600"
+          bgColor="bg-indigo-50"
+        />
+        <StatCard 
+          label="Virtual Machines" 
+          value={`${infraStats.vm.running}/${infraStats.vm.total}`} 
+          icon={Server} 
+          trend="Running" 
           color="text-blue-600"
           bgColor="bg-blue-50"
         />
         <StatCard 
-          label="Tugas Selesai" 
-          value={stats.completed} 
-          icon={CheckCircle2} 
-          trend="+05.2%" 
+          label="Backup Berhasil" 
+          value={`${infraStats.backup.success}/${infraStats.backup.total}`} 
+          icon={Archive} 
+          trend="Latest" 
           color="text-emerald-600"
           bgColor="bg-emerald-50"
         />
         <StatCard 
-          label="Drift Data" 
-          value={stats.neglected} 
-          icon={AlertTriangle} 
-          trend="-02.1%" 
-          color="text-amber-600"
-          bgColor="bg-amber-50"
-        />
-        <StatCard 
-          label="Avg Respon" 
-          value="1.2j" 
-          icon={TrendingUp} 
-          trend="+18.4%" 
-          color="text-purple-600"
-          bgColor="bg-purple-50"
+          label="Biz Process Tim" 
+          value={bizStats.total.toString()} 
+          icon={Users} 
+          trend="Active" 
+          color="text-orange-600"
+          bgColor="bg-orange-50"
         />
       </div>
 
@@ -137,7 +180,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between mb-2">
              <h2 className="text-sm font-bold text-gray-900 uppercase flex items-center gap-2">
                 <div className="w-1 h-4 bg-blue-600" />
-                Monitor Aktivitas Langsung
+                Monitor Aktivitas Langsung (Task Board)
              </h2>
              <span className="text-[10px] text-gray-400 font-medium uppercase">Menampilkan 5 Sinyal Terakhir</span>
           </div>
@@ -161,7 +204,7 @@ export default function Dashboard() {
                     <div className="flex items-center justify-between">
                       <h4 className="font-bold text-gray-900 text-lg group-hover:text-blue-600 transition-colors tracking-tight">{task.title}</h4>
                       <span className="text-[10px] font-medium uppercase text-gray-300">
-                        Sig ID: {task.id.slice(0, 8)} // {task.created_at ? format(task.created_at.toDate(), 'HH:mm') : 'SEKARANG'}
+                        Sig ID: {task.id.slice(0, 8)} // {task.created_at ? format(task.created_at.toDate ? task.created_at.toDate() : new Date(task.created_at), 'HH:mm') : 'SEKARANG'}
                       </span>
                     </div>
                     <p className="text-xs text-gray-400 font-medium mb-2 line-clamp-1">{task.description}</p>
@@ -188,30 +231,72 @@ export default function Dashboard() {
         </div>
 
         <div className="space-y-8">
-           <div>
-             <h2 className="text-[11px] font-bold text-gray-900 uppercase mb-6 flex items-center gap-2">
+          {notifications.length > 0 && (
+            <div>
+              <h2 className="text-[11px] font-bold text-red-600 uppercase mb-6 flex items-center gap-2">
+                <div className="w-1 h-4 bg-red-600 animate-pulse" />
+                Peringatan Sistem Terbaru
+              </h2>
+              <div className="space-y-3">
+                {notifications.map(n => (
+                  <div key={n.id} className="bg-red-50 border border-red-100 rounded-2xl p-4 flex gap-3 items-start animate-in fade-in slide-in-from-right-5">
+                    <AlertTriangle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-[10px] font-bold text-red-900 uppercase leading-tight">{n.title}</p>
+                      <p className="text-[9px] text-red-700 font-medium mt-1">{n.message}</p>
+                      <p className="text-[8px] text-red-400 font-bold uppercase mt-2">{n.created_at ? format(n.created_at.toDate ? n.created_at.toDate() : new Date(n.created_at), 'dd MMM HH:mm') : 'SEKARANG'}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div>
+            <h2 className="text-[11px] font-bold text-gray-900 uppercase mb-6 flex items-center gap-2">
                 <div className="w-1 h-4 bg-emerald-500" />
-                Kesehatan Infra
+                Kesehatan Infra & Layanan
              </h2>
              <div className="bg-white border border-gray-200 rounded-[2rem] p-6 space-y-4 shadow-sm text-[10px]">
-                <HealthItem label="HQ CCTV Grid" status="online" info="15/15 Channels" icon={Video} />
-                <HealthItem label="Backbone Link" status="online" info="Latency: 12ms" icon={Wifi} />
-                <HealthItem label="IoT Net Sensors" status="warning" info="2 Nodes Offline" icon={Activity} />
-                <HealthItem label="Mobile Ops Unit" status="online" info="Sig: Excellent" icon={Smartphone} />
+                <HealthItem 
+                  label="Physical Servers" 
+                  status={infraStats.physical.active === infraStats.physical.total && infraStats.physical.total > 0 ? "online" : infraStats.physical.total === 0 ? "unknown" : "warning"} 
+                  info={`${infraStats.physical.active}/${infraStats.physical.total} Online`} 
+                  icon={Shield} 
+                />
+                <HealthItem 
+                  label="Virtual Machines" 
+                  status={infraStats.vm.running === infraStats.vm.total && infraStats.vm.total > 0 ? "online" : infraStats.vm.total === 0 ? "unknown" : "warning"} 
+                  info={`${infraStats.vm.running}/${infraStats.vm.total} Running`} 
+                  icon={Server} 
+                />
+                <HealthItem 
+                  label="System Backups" 
+                  status={infraStats.backup.success === infraStats.backup.total && infraStats.backup.total > 0 ? "online" : infraStats.backup.total === 0 ? "unknown" : "warning"} 
+                  info={`${infraStats.backup.success}/${infraStats.backup.total} Success`} 
+                  icon={Archive} 
+                />
+                <HealthItem 
+                  label="Shared Folders" 
+                  status={infraStats.shared.ok === infraStats.shared.total && infraStats.shared.total > 0 ? "online" : infraStats.shared.total === 0 ? "unknown" : "warning"} 
+                  info={`${infraStats.shared.ok}/${infraStats.shared.total} Optimal`} 
+                  icon={HardDrive} 
+                />
              </div>
            </div>
  
            <div className="bg-gray-900 text-white rounded-[2rem] p-8 space-y-4 relative overflow-hidden group shadow-2xl">
              <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:rotate-12 transition-transform">
-                <Database className="w-24 h-24" />
+                <Users className="w-24 h-24" />
              </div>
              <div className="relative z-10">
-               <h3 className="text-xs font-bold text-blue-400 uppercase mb-2">Menunggu Tinjauan</h3>
+               <h3 className="text-xs font-bold text-orange-400 uppercase mb-2">Tim Bisnis Proses</h3>
                <p className="text-2xl font-bold text-white tracking-tight mb-4 uppercase">
-                  4 Item <br/> <span className="text-blue-500">Butuh Stempel</span>
+                  {bizStats.activeTasks} <span className="text-sm">Aktif</span><br/> 
+                  <span className="text-orange-500">{bizStats.completedTasks} <span className="text-sm text-white">Selesai</span></span>
                </p>
-               <button className="w-full py-4 bg-blue-600 text-white rounded-xl font-bold text-[10px] uppercase hover:bg-blue-700 transition-all active:scale-95 shadow-xl shadow-blue-600/30">
-                  Eksekusi Tinjauan
+               <button className="w-full py-4 bg-orange-600 text-white rounded-xl font-bold text-[10px] uppercase hover:bg-orange-700 transition-all active:scale-95 shadow-xl shadow-orange-600/30">
+                  Lihat Tracker
                </button>
              </div>
            </div>
@@ -228,7 +313,7 @@ function StatCard({ label, value, icon: Icon, trend, color, bgColor }: any) {
         <div className={cn("p-4 rounded-2xl transition-transform group-hover:scale-110 shadow-lg shadow-black/5", bgColor, color)}>
           <Icon className="w-6 h-6" />
         </div>
-        <div className={cn("flex items-center gap-1 font-bold text-[10px] px-2 py-1 rounded-lg", trend.startsWith('+') ? 'text-emerald-600 bg-emerald-50' : 'text-amber-600 bg-amber-50')}>
+        <div className={cn("flex items-center gap-1 font-bold text-[10px] px-2 py-1 rounded-lg", trend.startsWith('+') || trend === 'All Good' || trend === 'Running' || trend === 'Active' || trend === 'Latest' ? 'text-emerald-600 bg-emerald-50' : 'text-amber-600 bg-amber-50')}>
           {trend}
         </div>
       </div>
@@ -245,15 +330,16 @@ function HealthItem({ label, status, info, icon: Icon }: any) {
   return (
     <div className="flex items-center gap-4 p-4 rounded-2xl bg-gray-50/80 border border-gray-100 hover:bg-white hover:border-gray-200 transition-all group">
       <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center border border-gray-100 shadow-sm group-hover:scale-110 transition-transform">
-        <Icon className={cn("w-6 h-6", status === 'online' ? 'text-emerald-500' : 'text-amber-500')} />
+        <Icon className={cn("w-6 h-6", status === 'online' ? 'text-emerald-500' : status === 'unknown' ? 'text-gray-400' : 'text-amber-500')} />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-1">
           <p className="text-[11px] font-bold text-gray-900 truncate uppercase">{label}</p>
-          <div className={cn("w-2 h-2 rounded-full", status === 'online' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500')} />
+          <div className={cn("w-2 h-2 rounded-full", status === 'online' ? 'bg-emerald-500 animate-pulse' : status === 'unknown' ? 'bg-gray-300' : 'bg-amber-500 animate-pulse')} />
         </div>
         <p className="text-[9px] font-medium text-gray-400 uppercase tracking-wide">{info}</p>
       </div>
     </div>
   );
 }
+

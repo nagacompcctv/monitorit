@@ -38,12 +38,14 @@
       "description": "Hardware inventory item.",
       "type": "object",
       "properties": {
-        "type": { "type": "string", "enum": ["laptop", "pc", "hp", "tv"] },
+        "type": { "type": "string", "enum": ["laptop", "pc", "hp", "tv", "other"] },
+        "code": { "type": "string" },
         "serial_number": { "type": "string" },
         "model": { "type": "string" },
         "user_id": { "type": "string" },
         "location": { "type": "string" },
-        "status": { "type": "string", "enum": ["active", "broken", "maintenance", "storage"] }
+        "status": { "type": "string", "enum": ["active", "broken", "maintenance", "storage", "disposal"] },
+        "last_audit": { "type": "string", "format": "date-time" }
       },
       "required": ["type", "serial_number", "status"]
     },
@@ -123,6 +125,51 @@
         "description": { "type": "string" }
       },
       "required": ["name"]
+    },
+    "Topology": {
+      "title": "Network Topology",
+      "description": "Graph data for network visualization.",
+      "type": "object",
+      "properties": {
+        "nodes": { "type": "array" },
+        "edges": { "type": "array" },
+        "updated_at": { "type": "string" }
+      }
+    },
+    "Server": {
+      "title": "Server Data",
+      "description": "Server hardware and software specifications.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "ip": { "type": "string" },
+        "os": { "type": "string" },
+        "cpu": { "type": "string" },
+        "ram": { "type": "string" },
+        "storage": { "type": "string" },
+        "status": { "type": "string" }
+      }
+    },
+    "Domain": {
+      "title": "Domain Data",
+      "description": "Domain name and expiration status.",
+      "type": "object",
+      "properties": {
+        "url": { "type": "string" },
+        "provider": { "type": "string" },
+        "expiry": { "type": "string" },
+        "status": { "type": "string" }
+      }
+    },
+    "OrganizationStructure": {
+      "title": "Organization Structure",
+      "description": "Org chart data visualization.",
+      "type": "object",
+      "properties": {
+        "nodes": { "type": "array" },
+        "edges": { "type": "array" },
+        "updated_at": { "type": "string" }
+      }
     }
   },
   "firestore": {
@@ -161,6 +208,22 @@
     "/hardware_types/{typeId}": {
       "schema": "HardwareType",
       "description": "Hardware types"
+    },
+    "/topology/{topoId}": {
+      "schema": "Topology",
+      "description": "Network topology diagrams"
+    },
+    "/servers/{serverId}": {
+      "schema": "Server",
+      "description": "Server inventory"
+    },
+    "/domains/{domainId}": {
+      "schema": "Domain",
+      "description": "Domain expiry tracking"
+    },
+    "/organization/{orgId}": {
+      "schema": "OrganizationStructure",
+      "description": "Org structure chart"
     }
   }
 }

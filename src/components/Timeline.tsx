@@ -62,10 +62,15 @@ export default function Timeline() {
     department: 'software' as 'software' | 'hardware',
     startDate: format(today, 'yyyy-MM-dd'),
     endDate: format(today, 'yyyy-MM-dd'),
-    progress: 0
+    progress: 0,
+    priority: 'medium' as 'low' | 'medium' | 'high'
   });
 
-  const isAdmin = user?.role === 'head_of_it' || user?.role === 'administrator' || user?.role === 'it_admin';
+  const isAdmin = user?.role === 'head_of_it' || 
+                  user?.role === 'administrator' || 
+                  user?.role === 'supervisor' || 
+                  user?.role === 'manager' || 
+                  user?.role === 'it_admin';
   const isHeadOfIT = user?.role === 'head_of_it';
 
   useEffect(() => {
@@ -189,6 +194,7 @@ export default function Timeline() {
           start_date: Timestamp.fromDate(parseLocalDate(newTask.startDate)),
           end_date: Timestamp.fromDate(parseLocalDate(newTask.endDate)),
           progress: newTask.progress || 0,
+          priority: newTask.priority || 'medium',
           updated_at: serverTimestamp(),
         });
       } else {
@@ -204,6 +210,7 @@ export default function Timeline() {
           end_date: Timestamp.fromDate(parseLocalDate(newTask.endDate)),
           created_at: serverTimestamp(),
           updated_at: serverTimestamp(),
+          priority: newTask.priority || 'medium',
           manager_notes: []
         });
       }
@@ -224,7 +231,8 @@ export default function Timeline() {
       department: task.department,
       startDate: task.start_date ? format(task.start_date.toDate(), 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd'),
       endDate: task.end_date ? format(task.end_date.toDate(), 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd'),
-      progress: task.progress || 0
+      progress: task.progress || 0,
+      priority: task.priority || 'medium'
     });
     setIsModalOpen(true);
   };
@@ -275,7 +283,9 @@ export default function Timeline() {
                   type: 'project',
                   department: 'software',
                   startDate: format(new Date(), 'yyyy-MM-dd'),
-                  endDate: format(new Date(), 'yyyy-MM-dd')
+                  endDate: format(new Date(), 'yyyy-MM-dd'),
+                  progress: 0,
+                  priority: 'medium'
                 });
                 setIsModalOpen(true);
               }}
@@ -378,7 +388,17 @@ export default function Timeline() {
                       return (
                       <div key={task.id} className="grid grid-cols-[300px_1fr] group hover:bg-gray-50/30 transition-colors">
                         <div className="p-6 border-r border-gray-100 flex flex-col gap-1.5">
-                          <h4 className="text-xs font-bold text-gray-900 group-hover:text-blue-600 transition-colors uppercase tracking-tight">{task.title}</h4>
+                          <div className="flex items-center justify-between">
+                            <h4 className="text-xs font-bold text-gray-900 group-hover:text-blue-600 transition-colors uppercase tracking-tight line-clamp-1">{task.title}</h4>
+                            <span className={cn(
+                              "text-[8px] font-black px-1.5 py-0.5 rounded uppercase",
+                              task.priority === 'high' ? "bg-red-50 text-red-500" :
+                              task.priority === 'medium' ? "bg-blue-50 text-blue-500" :
+                              "bg-gray-50 text-gray-400"
+                            )}>
+                              {task.priority || 'MED'}
+                            </span>
+                          </div>
                           <div className="flex items-center gap-2">
                              <div className={cn("w-1.5 h-1.5 rounded-full", task.department === 'hardware' ? "bg-orange-500" : "bg-blue-500")} />
                              <span className="text-[9px] font-bold text-gray-400 uppercase">
@@ -556,17 +576,32 @@ export default function Timeline() {
                    </div>
                 </div>
  
-                <div className="space-y-1.5">
-                  <label className="block text-[9px] font-bold text-gray-300 uppercase px-1">Penugasan Resources</label>
-                  <select 
-                    required
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3.5 px-5 text-xs font-medium outline-none focus:border-blue-500"
-                    value={newTask.assigned_to}
-                    onChange={e => setNewTask(prev => ({ ...prev, assigned_to: e.target.value }))}
-                  >
-                    <option value="">Pilih Individu...</option>
-                    {staff.map(s => <option key={s.uid} value={s.uid}>{s.name.toUpperCase()}</option>)}
-                  </select>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="block text-[9px] font-bold text-gray-300 uppercase px-1">Penugasan Resources</label>
+                    <select 
+                      required
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3.5 px-5 text-xs font-medium outline-none focus:border-blue-500"
+                      value={newTask.assigned_to}
+                      onChange={e => setNewTask(prev => ({ ...prev, assigned_to: e.target.value }))}
+                    >
+                      <option value="">Pilih Individu...</option>
+                      {staff.map(s => <option key={s.uid} value={s.uid}>{s.name.toUpperCase()}</option>)}
+                    </select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="block text-[9px] font-bold text-gray-300 uppercase px-1">Prioritas</label>
+                    <select 
+                      required
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3.5 px-5 text-xs font-medium outline-none focus:border-blue-500"
+                      value={newTask.priority}
+                      onChange={e => setNewTask(prev => ({ ...prev, priority: e.target.value as any }))}
+                    >
+                      <option value="low">LOW</option>
+                      <option value="medium">MEDIUM</option>
+                      <option value="high">HIGH</option>
+                    </select>
+                  </div>
                 </div>
                 
                 {editTaskId && isHeadOfIT && (

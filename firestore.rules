@@ -82,7 +82,59 @@ service cloud.firestore {
       allow write: if true;
     }
 
+    match /topology/{topoId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /servers/{serverId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /domains/{domainId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /organization/{orgId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
     match /test/{docId} {
+      allow read, write: if true;
+    }
+
+    match /settings/{settingId} {
+      allow read, write: if true;
+    }
+
+    match /mon_vm/{docId} {
+      allow read, write: if true;
+    }
+
+    match /mon_physical/{docId} {
+      allow read, write: if true;
+    }
+
+    match /mon_email/{docId} {
+      allow read, write: if true;
+    }
+
+    match /mon_shared/{docId} {
+      allow read, write: if true;
+    }
+
+    match /mon_backup/{docId} {
+      allow read, write: if true;
+    }
+
+    match /mon_notifications/{docId} {
+      allow read, write: if true;
+    }
+
+    match /mon_bizprocess/{docId} {
       allow read, write: if true;
     }
   }

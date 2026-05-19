@@ -21,7 +21,8 @@ import {
   Loader2,
   Building2,
   Settings,
-  Cpu
+  Cpu,
+  Calendar
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
@@ -45,7 +46,7 @@ export default function SystemSettings({ activeTabFromProps }: SystemSettingsPro
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<{id: string, type: 'lokasi' | 'kategori' | 'perusahaan' | 'tipe'} | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'lokasi' | 'kategori' | 'perusahaan' | 'tipe' | 'gemini' | 'whatsapp'>('lokasi');
+  const [activeTab, setActiveTab] = useState<'lokasi' | 'kategori' | 'perusahaan' | 'tipe' | 'gemini' | 'whatsapp' | 'maintenance'>('lokasi');
 
   // Sync with props from Sidebar
   useEffect(() => {
@@ -56,6 +57,7 @@ export default function SystemSettings({ activeTabFromProps }: SystemSettingsPro
       else if (activeTabFromProps === 'settings-company') setActiveTab('perusahaan');
       else if (activeTabFromProps === 'settings-gemini') setActiveTab('gemini');
       else if (activeTabFromProps === 'settings-whatsapp') setActiveTab('whatsapp');
+      else if (activeTabFromProps === 'settings-maintenance') setActiveTab('maintenance');
     }
   }, [activeTabFromProps]);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -78,6 +80,12 @@ export default function SystemSettings({ activeTabFromProps }: SystemSettingsPro
   });
   const [savingKey, setSavingKey] = useState(false);
   const [keySaved, setKeySaved] = useState(false);
+  const [maintenanceConfig, setMaintenanceConfig] = useState({
+    laptop_pc: 4,
+    printer: 2,
+    hp_tv: 6,
+    other: 3
+  });
 
   useEffect(() => {
     const savedKey = localStorage.getItem('gemini_api_key');
@@ -124,6 +132,20 @@ export default function SystemSettings({ activeTabFromProps }: SystemSettingsPro
     }, 500);
   };
 
+  const handleSaveMaintenance = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingKey(true);
+    try {
+      await setDoc(doc(db, 'settings', 'maintenance'), maintenanceConfig);
+      setSavingKey(false);
+      setKeySaved(true);
+      setTimeout(() => setKeySaved(false), 3000);
+    } catch (err) {
+      console.error(err);
+      setSavingKey(false);
+    }
+  };
+
   const [formData, setFormData] = useState({
     name: '',
     description: ''
@@ -162,11 +184,18 @@ export default function SystemSettings({ activeTabFromProps }: SystemSettingsPro
       if (auth.currentUser) handleFirestoreError(error, OperationType.GET, 'hardware_types');
     });
 
+    const unsubMaintenance = onSnapshot(doc(db, 'settings', 'maintenance'), (docSnap) => {
+      if (docSnap.exists()) {
+        setMaintenanceConfig(docSnap.data() as any);
+      }
+    });
+
     return () => {
       unsubLocs();
       unsubCats();
       unsubComps();
       unsubTypes();
+      unsubMaintenance();
     };
   }, [currentUser?.uid]);
 
@@ -262,7 +291,7 @@ export default function SystemSettings({ activeTabFromProps }: SystemSettingsPro
               className="bg-gray-50 border border-gray-100 rounded-xl py-3 pl-12 pr-4 text-xs font-medium outline-none focus:border-blue-500 w-48 md:w-64 transition-all" 
             />
           </div>
-          {activeTab !== 'gemini' && activeTab !== 'whatsapp' && (
+          {activeTab !== 'gemini' && activeTab !== 'whatsapp' && activeTab !== 'maintenance' && (
             <button 
               onClick={() => { resetForm(); setIsModalOpen(true); }}
               className="flex items-center gap-3 bg-gray-900 text-white px-8 py-3.5 rounded-xl font-bold text-xs shadow-xl shadow-gray-900/20 hover:scale-105 transition-all"
@@ -370,7 +399,7 @@ export default function SystemSettings({ activeTabFromProps }: SystemSettingsPro
                 </div>
               </form>
             </div>
-          ) : (
+          ) : activeTab === 'whatsapp' ? (
             <div className="bg-white border border-gray-100 rounded-[2.5rem] p-8 shadow-sm">
               <div className="flex items-center gap-4 mb-8">
                 <div className="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center border border-emerald-100/50">
@@ -425,6 +454,80 @@ export default function SystemSettings({ activeTabFromProps }: SystemSettingsPro
                       value={waConfig.receiver}
                       onChange={e => setWaConfig(prev => ({ ...prev, receiver: e.target.value }))}
                       className="w-full bg-gray-50 border border-gray-100 rounded-xl py-3 px-5 text-xs font-medium outline-none focus:border-emerald-500 transition-all font-sans"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-4 flex items-center justify-end">
+                  <button 
+                    type="submit" 
+                    disabled={savingKey}
+                    className="flex items-center gap-3 bg-gray-900 text-white px-8 py-3.5 rounded-xl font-bold text-xs shadow-xl shadow-gray-900/20 hover:scale-105 transition-all disabled:opacity-50"
+                  >
+                    {savingKey ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : keySaved ? (
+                      <Check className="w-4 h-4 text-emerald-400" />
+                    ) : (
+                      <Settings className="w-4 h-4" />
+                    )}
+                    {savingKey ? 'Menyimpan...' : keySaved ? 'Tersimpan' : 'Simpan Konfigurasi'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          ) : (
+            <div className="bg-white border border-gray-100 rounded-[2.5rem] p-8 shadow-sm">
+              <div className="flex items-center gap-4 mb-8">
+                <div className="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center border border-indigo-100/50">
+                  <Calendar className="w-7 h-7 text-indigo-500" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900 uppercase">Jadwal Maintenance</h2>
+                  <p className="text-[10px] text-gray-400 font-medium uppercase mt-1">Konfigurasi interval waktu (dalam bulan) untuk setiap kategori perangkat</p>
+                </div>
+              </div>
+              
+              <form onSubmit={handleSaveMaintenance} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Laptop & PC (Bulan)</label>
+                    <input 
+                      type="number"
+                      min="1"
+                      value={maintenanceConfig.laptop_pc}
+                      onChange={e => setMaintenanceConfig(prev => ({ ...prev, laptop_pc: parseInt(e.target.value) || 0 }))}
+                      className="w-full bg-gray-50 border border-gray-100 rounded-xl py-3 px-5 text-xs font-medium outline-none focus:border-indigo-500 transition-all font-sans"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Printer (Bulan)</label>
+                    <input 
+                      type="number"
+                      min="1"
+                      value={maintenanceConfig.printer}
+                      onChange={e => setMaintenanceConfig(prev => ({ ...prev, printer: parseInt(e.target.value) || 0 }))}
+                      className="w-full bg-gray-50 border border-gray-100 rounded-xl py-3 px-5 text-xs font-medium outline-none focus:border-indigo-500 transition-all font-sans"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">HP & TV (Bulan)</label>
+                    <input 
+                      type="number"
+                      min="1"
+                      value={maintenanceConfig.hp_tv}
+                      onChange={e => setMaintenanceConfig(prev => ({ ...prev, hp_tv: parseInt(e.target.value) || 0 }))}
+                      className="w-full bg-gray-50 border border-gray-100 rounded-xl py-3 px-5 text-xs font-medium outline-none focus:border-indigo-500 transition-all font-sans"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Lainnya (Bulan)</label>
+                    <input 
+                      type="number"
+                      min="1"
+                      value={maintenanceConfig.other}
+                      onChange={e => setMaintenanceConfig(prev => ({ ...prev, other: parseInt(e.target.value) || 0 }))}
+                      className="w-full bg-gray-50 border border-gray-100 rounded-xl py-3 px-5 text-xs font-medium outline-none focus:border-indigo-500 transition-all font-sans"
                     />
                   </div>
                 </div>
