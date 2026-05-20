@@ -6,7 +6,7 @@ import {
   onSnapshot, 
   deleteDoc, 
   doc
-} from 'firebase/firestore';
+} from '../lib/firebase';
 import { db, auth, updateTaskProgressFromReports, handleFirestoreError, OperationType } from '../lib/firebase';
 import { DailyReport, User } from '../types';
 import { useAuth } from '../App';

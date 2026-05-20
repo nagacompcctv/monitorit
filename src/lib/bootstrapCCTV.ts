@@ -1,5 +1,5 @@
 import { db } from './firebase';
-import { collection, addDoc, getDocs, query, limit } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, limit } from './firebase';
 
 const cctvData = [
   { location_name: 'HOLDING', nvr_name: '1 (16ch)', camera_count: 10, hdd_capacity_tb: 1, retention_days: 7 },

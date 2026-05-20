@@ -26,7 +26,7 @@ import {
   orderBy,
   getDocs,
   Timestamp
-} from 'firebase/firestore';
+} from '../lib/firebase';
 import { db } from '../lib/firebase';
 import { Task, User } from '../types';
 import { useAuth } from '../App';

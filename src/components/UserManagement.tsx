@@ -8,7 +8,7 @@ import {
   updateDoc, 
   deleteDoc,
   where
-} from 'firebase/firestore';
+} from '../lib/firebase';
 import { db, auth } from '../lib/firebase';
 import { User, UserRole } from '../types';
 import { 

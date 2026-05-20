@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, onSnapshot, query, doc, deleteDoc, updateDoc, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, onSnapshot, query, doc, deleteDoc, updateDoc, addDoc, serverTimestamp } from '../../lib/firebase';
 import { db } from '../../lib/firebase';
 import { MonitoringPhysical } from '../../types';
 import { Loader2, Plus, Edit2, Trash2, X } from 'lucide-react';

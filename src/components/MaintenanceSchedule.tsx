@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs, query, orderBy, Timestamp, doc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, Timestamp, doc, getDoc } from '../lib/firebase';
 import { db } from '../lib/firebase';
 import { Asset, AssetHistory } from '../types';
 import { Loader2, Calendar, AlertCircle, Clock, CheckCircle2 } from 'lucide-react';

@@ -8,7 +8,7 @@ import {
   Loader2,
   Pencil
 } from 'lucide-react';
-import { collection, onSnapshot, query, deleteDoc, doc, addDoc, getDocs, updateDoc } from 'firebase/firestore';
+import { collection, onSnapshot, query, deleteDoc, doc, addDoc, getDocs, updateDoc } from '../lib/firebase';
 import { db, auth, handleFirestoreError, OperationType } from '../lib/firebase';
 import { CCTVInstallation } from '../types';
 import { motion, AnimatePresence } from 'motion/react';

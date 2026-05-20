@@ -8,7 +8,7 @@ import {
   updateDoc, 
   deleteDoc,
   serverTimestamp
-} from 'firebase/firestore';
+} from '../lib/firebase';
 import { db, auth, handleFirestoreError, OperationType } from '../lib/firebase';
 import { 
   Plus, 

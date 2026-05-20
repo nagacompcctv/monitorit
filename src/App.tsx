@@ -1,6 +1,6 @@
 import React, { useState, useEffect, createContext, useContext } from "react";
 import { auth, db } from "./lib/firebase";
-import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
+import { onAuthStateChanged, User as FirebaseUser } from './lib/firebase';
 import {
   doc,
   getDoc,
@@ -10,7 +10,7 @@ import {
   where,
   getDocs,
   deleteDoc,
-} from "firebase/firestore";
+} from './lib/firebase';
 import { User, UserRole } from "./types";
 import ServerMonitoring from "./components/ServerMonitoring";
 import BusinessProcessTeam from "./components/BusinessProcessTeam";

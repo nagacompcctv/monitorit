@@ -1,5 +1,5 @@
 import { db } from './firebase';
-import { collection, addDoc, getDocs, query, limit } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, limit } from './firebase';
 
 const assets = [
   { code: 'INV/DNK/04-2026/00003', origin_code: '-', model: 'LAPTOP ASUS', category: 'INVENTARIS', brand: 'Asus Vivobook', serial_number: '-', description: '-', notes: 'Untuk APJ DNK', location: 'DNK 1', previous_location: '-', company: 'Dua Naga Kosmetindo', type: 'laptop', status: 'active' },

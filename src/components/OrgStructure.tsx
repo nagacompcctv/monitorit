@@ -17,7 +17,7 @@ import {
   useReactFlow,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { collection, doc, getDoc, setDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, setDoc } from '../lib/firebase';
 import { db } from '../lib/firebase';
 import { useAuth } from '../App';
 import { Loader2, Save, Plus, Trash2, Edit2, X, User } from 'lucide-react';

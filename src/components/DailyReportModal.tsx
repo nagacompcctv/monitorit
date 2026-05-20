@@ -8,7 +8,7 @@ import {
   getDocs,
   query,
   orderBy
-} from 'firebase/firestore';
+} from '../lib/firebase';
 import { db, auth, updateTaskProgressFromReports } from '../lib/firebase';
 import { DailyReport, User, Task } from '../types';
 import { useAuth } from '../App';

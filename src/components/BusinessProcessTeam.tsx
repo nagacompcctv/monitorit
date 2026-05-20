@@ -8,7 +8,7 @@ import {
   updateDoc,
   addDoc,
   serverTimestamp,
-} from "firebase/firestore";
+} from '../lib/firebase';
 import { db } from "../lib/firebase";
 import { useAuth } from "../App";
 import {

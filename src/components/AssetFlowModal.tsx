@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Asset, AssetHistory, User } from '../types';
 import { X, Loader2 } from 'lucide-react';
-import { addDoc, collection, doc, serverTimestamp, updateDoc, getDocs, query } from 'firebase/firestore';
+import { addDoc, collection, doc, serverTimestamp, updateDoc, getDocs, query } from '../lib/firebase';
 import { db, auth, handleFirestoreError, OperationType } from '../lib/firebase';
 import { motion, AnimatePresence } from 'motion/react';
 import SearchableSelect from './SearchableSelect';

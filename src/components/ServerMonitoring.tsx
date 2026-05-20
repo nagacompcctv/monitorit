@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, onSnapshot, query, orderBy, doc, deleteDoc } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, doc, deleteDoc } from '../lib/firebase';
 import { db } from '../lib/firebase';
 import { useAuth } from '../App';
 import { Activity, Server, Mail, HardDrive, Shield, AlertCircle, Plus, Trash2, Edit2, Archive, Search, Filter } from 'lucide-react';

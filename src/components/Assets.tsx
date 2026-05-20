@@ -19,7 +19,7 @@ import {
   ClipboardList,
   Wrench
 } from 'lucide-react';
-import { collection, onSnapshot, query, deleteDoc, doc, addDoc, getDocs, updateDoc, serverTimestamp, where, orderBy } from 'firebase/firestore';
+import { collection, onSnapshot, query, deleteDoc, doc, addDoc, getDocs, updateDoc, serverTimestamp, where, orderBy } from '../lib/firebase';
 import { db, auth, handleFirestoreError, OperationType } from '../lib/firebase';
 import { Asset, AssetHistory } from '../types';
 import { cn } from '../lib/utils';

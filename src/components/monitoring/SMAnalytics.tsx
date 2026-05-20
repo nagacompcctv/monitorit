@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, onSnapshot } from '../../lib/firebase';
 import { db } from '../../lib/firebase';
 import { MonitoringVM, MonitoringPhysical } from '../../types';
 import { 

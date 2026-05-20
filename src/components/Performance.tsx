@@ -15,7 +15,7 @@ import {
   X,
   UserPlus
 } from 'lucide-react';
-import { collection, onSnapshot, query, orderBy, limit, addDoc, updateDoc, deleteDoc, doc, Timestamp } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, limit, addDoc, updateDoc, deleteDoc, doc, Timestamp } from '../lib/firebase';
 import { db, auth } from '../lib/firebase';
 import { User, Task, DailyReport } from '../types';
 import pptxgen from 'pptxgenjs';

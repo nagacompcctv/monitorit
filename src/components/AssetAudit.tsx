@@ -9,7 +9,7 @@ import {
   doc, 
   serverTimestamp,
   orderBy
-} from 'firebase/firestore';
+} from '../lib/firebase';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { Asset } from '../types';
 import { 

@@ -19,7 +19,7 @@ import {
   Archive,
   Users
 } from 'lucide-react';
-import { collection, query, onSnapshot, orderBy, limit } from 'firebase/firestore';
+import { collection, query, onSnapshot, orderBy, limit } from '../lib/firebase';
 import { db, auth, handleFirestoreError, OperationType } from '../lib/firebase';
 import { Task } from '../types';
 import { format } from 'date-fns';

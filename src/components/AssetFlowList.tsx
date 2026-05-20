@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../lib/firebase';
-import { collection, query, where, orderBy, onSnapshot, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, query, where, orderBy, onSnapshot, getDocs, doc, updateDoc, deleteDoc } from '../lib/firebase';
 import { format } from 'date-fns';
 import { id as idLocale } from 'date-fns/locale';
 import { AssetHistory, Asset } from '../types';

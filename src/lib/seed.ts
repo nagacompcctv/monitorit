@@ -1,5 +1,5 @@
 import { db } from './firebase';
-import { collection, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, doc, setDoc, serverTimestamp } from './firebase';
 
 export const seedDatabase = async () => {
   const users = [

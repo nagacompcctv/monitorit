@@ -1,5 +1,5 @@
 import { db } from './firebase';
-import { collection, addDoc, getDocs, query, limit } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, limit } from './firebase';
 
 const domains = [
   { no: 1, url: 'duanaga.co.id', is_niagahoster: true, expiry_date: '25 - 02 - 2027' },
