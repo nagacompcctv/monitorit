@@ -27,15 +27,15 @@ export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
   const isAdmin =
     user?.role === "head_of_it" ||
     user?.role === "administrator" ||
-    user?.role === "supervisor" ||
-    user?.role === "manager" ||
     user?.role === "it_admin";
-  const isStaff =
-    user?.role === "staff_software" || user?.role === "staff_hardware";
+  const isStaffSoftware = user?.role === "staff_software";
+  const isStaffHardware = user?.role === "staff_hardware";
+  const isSupervisor = user?.role === "supervisor";
+  const isManager = user?.role === "manager";
 
   const menuItems = [];
 
-  if (!isStaff) {
+  if (!isStaffSoftware && !isStaffHardware && !isSupervisor && !isManager) {
     menuItems.push({
       id: "dashboard",
       label: "Ringkasan",
@@ -49,23 +49,32 @@ export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
     icon: GanttChartSquare,
   });
   menuItems.push({ id: "reports", label: "Laporan Harian", icon: FileText });
-  menuItems.push({
-    id: "server-monitoring",
-    label: "Server Monitoring",
-    icon: Activity,
-  });
-  menuItems.push({
-    id: "biz-process",
-    label: "Tim Bisnis Proses",
-    icon: Users,
-  });
+  
+  if (!isStaffSoftware && !isSupervisor && !isManager) {
+    menuItems.push({
+      id: "server-monitoring",
+      label: "Server Monitoring",
+      icon: Activity,
+    });
+  }
 
-  if (!isStaff) {
+  if (!isStaffSoftware && !isStaffHardware && !isManager) {
+    menuItems.push({
+      id: "biz-process",
+      label: "Tim Bisnis Proses",
+      icon: Users,
+    });
+  }
+
+  if (!isStaffSoftware && !isStaffHardware && !isSupervisor) {
     menuItems.push({
       id: "performance",
       label: "Performa Personal",
       icon: Cpu,
     });
+  }
+
+  if (!isStaffSoftware && !isSupervisor && !isManager) {
     menuItems.push({
       id: "it_data_group",
       label: "Data IT",
@@ -95,19 +104,29 @@ export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
 
   if (isAdmin) {
     menuItems.push({ id: "users", label: "Manajemen User", icon: Users });
+  }
+
+  if (isAdmin || isStaffHardware) {
+    const settingsSubMenu = [
+      { id: "settings-location", label: "Manajemen Lokasi" },
+      { id: "settings-hardware-type", label: "Tipe Hardware" },
+      { id: "settings-asset-category", label: "Kategori Aset" },
+      { id: "settings-company", label: "Daftar Perusahaan" },
+    ];
+
+    if (isAdmin) {
+      settingsSubMenu.push(
+        { id: "settings-gemini", label: "Konfigurasi Gemini" },
+        { id: "settings-whatsapp", label: "Konfigurasi WhatsApp" },
+        { id: "settings-maintenance", label: "Jadwal Maintenance" }
+      );
+    }
+
     menuItems.push({
       id: "settings",
       label: "Pengaturan",
       icon: Settings,
-      subMenu: [
-        { id: "settings-location", label: "Manajemen Lokasi" },
-        { id: "settings-hardware-type", label: "Tipe Hardware" },
-        { id: "settings-asset-category", label: "Kategori Aset" },
-        { id: "settings-company", label: "Daftar Perusahaan" },
-        { id: "settings-gemini", label: "Konfigurasi Gemini" },
-        { id: "settings-whatsapp", label: "Konfigurasi WhatsApp" },
-        { id: "settings-maintenance", label: "Jadwal Maintenance" },
-      ],
+      subMenu: settingsSubMenu,
     });
   }
 

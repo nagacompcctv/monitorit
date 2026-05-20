@@ -260,7 +260,7 @@ export default function SystemSettings({ activeTabFromProps }: SystemSettingsPro
       (item.description && item.description.toLowerCase().includes(searchQuery.toLowerCase()))
     );
 
-  if (currentUser?.role !== 'head_of_it' && currentUser?.role !== 'administrator' && currentUser?.role !== 'it_admin') {
+  if (currentUser?.role !== 'head_of_it' && currentUser?.role !== 'administrator' && currentUser?.role !== 'it_admin' && currentUser?.role !== 'staff_hardware') {
     return (
       <div className="h-96 flex items-center justify-center">
         <p className="text-gray-400 font-medium">Akses ditolak. Hanya Head of IT, Administrator, atau IT Admin yang dapat mengakses menu ini.</p>

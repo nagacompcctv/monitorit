@@ -23,6 +23,7 @@ export default function ServerMonitoring() {
                   user?.role === 'administrator' || 
                   user?.role === 'supervisor' || 
                   user?.role === 'manager' || 
+                  user?.role === 'staff_hardware' ||
                   user?.role === 'it_admin';
 
   return (

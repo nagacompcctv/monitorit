@@ -1,5 +1,5 @@
 import React, { useState, useEffect, createContext, useContext } from "react";
-import { auth, db, signInWithGoogle } from "./lib/firebase";
+import { auth, db } from "./lib/firebase";
 import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
 import {
   doc,
@@ -57,26 +57,26 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("timeline");
 
-  const isStaff =
-    user?.role === "staff_software" || user?.role === "staff_hardware";
+  const isStaffSoftware = user?.role === "staff_software";
+  const isStaffHardware = user?.role === "staff_hardware";
+  const isSupervisor = user?.role === "supervisor";
+  const isManager = user?.role === "manager";
   const isAdmin =
     user?.role === "head_of_it" ||
     user?.role === "administrator" ||
-    user?.role === "supervisor" ||
-    user?.role === "manager" ||
     user?.role === "it_admin";
 
   useEffect(() => {
     if (
       user &&
-      !isStaff &&
+      !isStaffSoftware && !isStaffHardware && !isSupervisor && !isManager &&
       activeTab === "timeline" &&
       !localStorage.getItem("tab_initialized")
     ) {
       setActiveTab("dashboard");
       localStorage.setItem("tab_initialized", "true");
     }
-  }, [user, isStaff]);
+  }, [user, isStaffSoftware, isStaffHardware, isSupervisor, isManager]);
 
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -277,25 +277,6 @@ export default function App() {
               </button>
             </form>
 
-            <div className="relative flex items-center justify-center">
-              <div className="absolute inset-0 border-t border-gray-100" />
-              <span className="relative px-4 bg-white text-[10px] text-gray-300 font-bold uppercase">
-                Atau
-              </span>
-            </div>
-
-            <button
-              onClick={signInWithGoogle}
-              className="w-full flex items-center justify-center gap-4 bg-gray-900 text-white py-4 px-6 rounded-xl font-bold text-sm hover:bg-gray-800 transition-all active:scale-95 shadow-lg shadow-gray-900/10"
-            >
-              <img
-                src="https://www.google.com/favicon.ico"
-                className="w-4 h-4 bg-white rounded-full p-0.5"
-                alt="Google"
-              />
-              Masuk dengan Google
-            </button>
-
             <div className="pt-8 border-t border-gray-50">
               <p className="text-[10px] text-gray-400 font-medium uppercase">
                 Akses khusus personel terdaftar
@@ -329,44 +310,44 @@ export default function App() {
               className={`h-full flex flex-col ${activeTab === "assets-audit" ? "p-0" : "p-4 md:p-6 pb-24"}`}
             >
               <Layout>
-                {activeTab === "dashboard" && !isStaff && <Dashboard />}
+                {activeTab === "dashboard" && !isStaffSoftware && !isStaffHardware && !isSupervisor && !isManager && <Dashboard />}
                 {activeTab === "timeline" && <Timeline />}
                 {activeTab === "reports" && <DailyReports />}
-                {activeTab === "server-monitoring" && <ServerMonitoring />}
-                {activeTab === "biz-process" && <BusinessProcessTeam />}
-                {activeTab === "assets-hardware" && !isStaff && <Assets />}
-                {activeTab === "assets-surveilans" && !isStaff && (
+                {activeTab === "server-monitoring" && !isStaffSoftware && !isSupervisor && !isManager && <ServerMonitoring />}
+                {activeTab === "biz-process" && !isStaffHardware && !isStaffSoftware && !isManager && <BusinessProcessTeam />}
+                {activeTab === "assets-hardware" && !isStaffSoftware && !isSupervisor && !isManager && <Assets />}
+                {activeTab === "assets-surveilans" && !isStaffSoftware && !isSupervisor && !isManager && (
                   <Surveilans />
                 )}
-                {activeTab === "assets-topology" && !isStaff && (
+                {activeTab === "assets-topology" && !isStaffSoftware && !isSupervisor && !isManager && (
                   <NetworkTopology />
                 )}
-                {activeTab === "assets-server" && !isStaff && (
+                {activeTab === "assets-server" && !isStaffSoftware && !isSupervisor && !isManager && (
                   <ServerManagement />
                 )}
-                {activeTab === "assets-domain" && !isStaff && (
+                {activeTab === "assets-domain" && !isStaffSoftware && !isSupervisor && !isManager && (
                   <DomainManagement />
                 )}
-                {activeTab === "assets-org" && !isStaff && <OrgStructure />}
-                {activeTab === "assets-flow-serah_terima" && !isStaff && (
+                {activeTab === "assets-org" && !isStaffSoftware && !isSupervisor && !isManager && <OrgStructure />}
+                {activeTab === "assets-flow-serah_terima" && !isStaffSoftware && !isSupervisor && !isManager && (
                   <AssetFlowList mode="serah_terima" isAdmin={isAdmin} />
                 )}
-                {activeTab === "assets-flow-maintenance" && !isStaff && (
+                {activeTab === "assets-flow-maintenance" && !isStaffSoftware && !isSupervisor && !isManager && (
                   <MaintenanceSchedule />
                 )}
-                {activeTab === "assets-flow-mutasi" && !isStaff && (
+                {activeTab === "assets-flow-mutasi" && !isStaffSoftware && !isSupervisor && !isManager && (
                   <AssetFlowList mode="mutasi" isAdmin={isAdmin} />
                 )}
-                {activeTab === "assets-flow-stock_opname" && !isStaff && (
+                {activeTab === "assets-flow-stock_opname" && !isStaffSoftware && !isSupervisor && !isManager && (
                   <AssetFlowList mode="stock_opname" isAdmin={isAdmin} />
                 )}
-                {activeTab === "assets-flow-disposal" && !isStaff && (
+                {activeTab === "assets-flow-disposal" && !isStaffSoftware && !isSupervisor && !isManager && (
                   <AssetFlowList mode="disposal" isAdmin={isAdmin} />
                 )}
-                {activeTab === "assets-audit" && !isStaff && <AssetAudit />}
-                {activeTab === "performance" && !isStaff && <Performance />}
+                {activeTab === "assets-audit" && !isStaffSoftware && !isSupervisor && !isManager && <AssetAudit />}
+                {activeTab === "performance" && !isStaffSoftware && !isStaffHardware && !isSupervisor && <Performance />}
                 {activeTab === "users" && isAdmin && <UserManagement />}
-                {activeTab.startsWith("settings") && isAdmin && (
+                {activeTab.startsWith("settings") && (isAdmin || isStaffHardware) && (
                   <SystemSettings activeTabFromProps={activeTab} />
                 )}
               </Layout>

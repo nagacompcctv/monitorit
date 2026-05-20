@@ -30,7 +30,7 @@ import AssetFlowModal from './AssetFlowModal';
 
 export default function Assets() {
   const { user } = useAuth();
-  const isAdmin = user?.role && ['head_of_it', 'administrator', 'supervisor', 'manager', 'it_admin'].includes(user.role);
+  const isAdmin = user?.role && ['head_of_it', 'administrator', 'supervisor', 'manager', 'it_admin', 'staff_hardware'].includes(user.role);
   const [assets, setAssets] = useState<Asset[]>([]);
   const [locations, setLocations] = useState<{id: string, name: string}[]>([]);
   const [categories, setCategories] = useState<{id: string, name: string}[]>([]);

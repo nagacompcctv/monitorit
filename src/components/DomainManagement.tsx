@@ -20,6 +20,7 @@ export default function DomainManagement() {
                   user?.role === 'administrator' || 
                   user?.role === 'supervisor' || 
                   user?.role === 'manager' || 
+                  user?.role === 'staff_hardware' ||
                   user?.role === 'it_admin';
 
   const [formData, setFormData] = useState<Partial<DomainData>>({

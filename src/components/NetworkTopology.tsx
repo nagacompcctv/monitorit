@@ -166,6 +166,7 @@ function TopologyInner() {
                   user?.role === 'administrator' || 
                   user?.role === 'supervisor' || 
                   user?.role === 'manager' || 
+                  user?.role === 'staff_hardware' ||
                   user?.role === 'it_admin';
 
   // Memoize the node renderer to handle both static (initial) and dynamic nodes

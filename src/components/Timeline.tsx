@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { SectionHeader, Card } from './Layout';
 import { 
   Plus, 
@@ -31,7 +31,7 @@ import { db } from '../lib/firebase';
 import { Task, User } from '../types';
 import { useAuth } from '../App';
 import { cn } from '../lib/utils';
-import { format, differenceInDays, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, getDay, addMonths, subMonths, startOfDay } from 'date-fns';
+import { format, differenceInDays, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, getDay, addMonths, subMonths, startOfDay, addDays } from 'date-fns';
 import { motion, AnimatePresence } from 'motion/react';
 
 import DailyReportModal from './DailyReportModal';
@@ -45,6 +45,7 @@ export default function Timeline() {
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState<string | undefined>(undefined);
   const [editTaskId, setEditTaskId] = useState<string | null>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
   
   // Date Logic
   const today = new Date();
@@ -345,7 +346,7 @@ export default function Timeline() {
                 <div className="p-5 border-r border-gray-100">
                   <span className="text-[9px] font-bold text-gray-300 uppercase">Sumber Daya Operasional</span>
                 </div>
-                <div className="flex">
+                <div className="flex" ref={gridRef}>
                   {daysInMonth.map((day, dIdx) => (
                     <div 
                       key={dIdx} 
@@ -423,10 +424,29 @@ export default function Timeline() {
                             }}
                           >
                             <motion.div 
+                               drag={isAdmin ? "x" : false}
+                               dragMomentum={false}
+                               onDragEnd={async (e, info) => {
+                                 if (!isAdmin || !gridRef.current) return;
+                                 const dayWidth = gridRef.current.offsetWidth / daysInMonth.length;
+                                 const deltaDays = Math.round(info.offset.x / dayWidth);
+                                 if (deltaDays !== 0) {
+                                   const startRaw = task.start_date?.toDate ? task.start_date.toDate() : new Date(task.start_date);
+                                   const endRaw = task.end_date?.toDate ? task.end_date.toDate() : new Date(task.end_date);
+                                   const newStart = addDays(startRaw, deltaDays);
+                                   const newEnd = addDays(endRaw, deltaDays);
+                                   await updateDoc(doc(db, 'tasks', task.id), {
+                                     start_date: Timestamp.fromDate(newStart),
+                                     end_date: Timestamp.fromDate(newEnd),
+                                     updated_at: serverTimestamp()
+                                   });
+                                 }
+                               }}
                                initial={{ scaleX: 0, opacity: 0 }}
-                               animate={{ scaleX: 1, opacity: 1 }}
+                               animate={{ scaleX: 1, opacity: 1, x: 0 }}
                                className={cn(
                                  "w-full h-full rounded-xl relative overflow-hidden flex items-center px-4 shadow-xl shadow-black/5 group/bar border",
+                                 isAdmin ? "cursor-grab active:cursor-grabbing" : "",
                                  task.progress === 100 
                                    ? "bg-emerald-50 border-emerald-200" 
                                    : task.department === 'hardware' ? "bg-orange-50 border-orange-100" : "bg-blue-50 border-blue-100"
@@ -604,7 +624,7 @@ export default function Timeline() {
                   </div>
                 </div>
                 
-                {editTaskId && isHeadOfIT && (
+                {editTaskId && isAdmin && (
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between px-1">
                       <label className="block text-[9px] font-bold text-gray-300 uppercase">Progres Operasional</label>
