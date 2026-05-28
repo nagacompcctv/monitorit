@@ -32,6 +32,7 @@ RUN npm config set registry https://registry.npmmirror.com/ && \
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/server.ts ./server.ts
 COPY --from=build /app/server ./server
+COPY --from=build /app/drizzle.config.ts ./drizzle.config.ts
 
 # Expose port 3001
 EXPOSE 3001
