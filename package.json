@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit",
-    "db:push": "drizzle-kit push",
+    "db:push": "drizzle-kit push --config=drizzle.config.ts",
     "db:seed": "tsx server/db/seed.ts"
   },
   "dependencies": {
