@@ -6,8 +6,9 @@ WORKDIR /app
 # Copy package.json and package-lock.json
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install
+# Install dependencies with retry and stable registry
+RUN npm config set registry https://registry.npmmirror.com/ && \
+    npm install --fetch-retries=5 --fetch-retry-mintimeout=20000 --fetch-retry-maxtimeout=120000
 
 # Copy application files
 COPY . .
@@ -23,8 +24,9 @@ WORKDIR /app
 # Copy package.json and package-lock.json
 COPY package*.json ./
 
-# Install production dependencies only
-RUN npm install --production
+# Install production dependencies only with retry
+RUN npm config set registry https://registry.npmmirror.com/ && \
+    npm install --production --fetch-retries=5 --fetch-retry-mintimeout=20000 --fetch-retry-maxtimeout=120000
 
 # Copy built application from build stage
 COPY --from=build /app/dist ./dist
