@@ -24,9 +24,9 @@ WORKDIR /app
 # Copy package.json and package-lock.json
 COPY package*.json ./
 
-# Install production dependencies only with retry
+# Install all dependencies (including devDependencies for drizzle-kit)
 RUN npm config set registry https://registry.npmmirror.com/ && \
-    npm install --production --fetch-retries=5 --fetch-retry-mintimeout=20000 --fetch-retry-maxtimeout=120000
+    npm install --fetch-retries=5 --fetch-retry-mintimeout=20000 --fetch-retry-maxtimeout=120000
 
 # Copy built application from build stage
 COPY --from=build /app/dist ./dist
