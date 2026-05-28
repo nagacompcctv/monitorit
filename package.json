@@ -26,7 +26,6 @@
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
     "express": "^4.22.2",
-    "firebase": "^12.13.0",
     "jsonwebtoken": "^9.0.3",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.7",

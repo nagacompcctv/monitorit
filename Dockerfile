@@ -1,5 +1,5 @@
 # Build stage
-FROM node:18-alpine AS build
+FROM node:20-alpine AS build
 
 WORKDIR /app
 
@@ -16,16 +16,23 @@ COPY . .
 RUN npm run build
 
 # Production stage
-FROM nginx:alpine
+FROM node:20-alpine
 
-# Copy the build output to replace the default nginx contents
-COPY --from=build /app/dist /usr/share/nginx/html
+WORKDIR /app
 
-# Copy custom nginx configuration for single-page application routing
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy package.json and package-lock.json
+COPY package*.json ./
 
-# Expose port 80
-EXPOSE 80
+# Install production dependencies only
+RUN npm install --production
 
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Copy built application from build stage
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/server.ts ./server.ts
+COPY --from=build /app/server ./server
+
+# Expose port 3001
+EXPOSE 3001
+
+# Start the server
+CMD ["npm", "run", "start"]
