@@ -1,20 +1,38 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# MonitorIT - IT Asset Management
 
-# Run and deploy your AI Studio app
+Sistem manajemen aset IT untuk monitoring infrastruktur, CCTV, server, dan aset perusahaan.
 
-This contains everything you need to run your app locally.
+## Fitur Utama
 
-View your app in AI Studio: https://ai.studio/apps/f5f158e4-0988-4bff-9592-4e67bc0b1230
+- **Dashboard** - Ringkasan aset dan aktivitas
+- **Asset Management** - Manajemen aset hardware & software
+- **CCTV Monitoring** - Monitoring instalasi CCTV
+- **Server Monitoring** - Monitoring server & virtual machine
+- **Daily Reports** - Laporan harian aktivitas IT
+- **Maintenance** - Jadwal maintenance perangkat
+- **User Management** - Manajemen pengguna & role
 
-## Run Locally
+## Jalankan Lokal
 
-**Prerequisites:**  Node.js
-
+**Prerequisites:** Node.js
 
 1. Install dependencies:
    `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+
+2. Set environment variables di `.env`:
+   ```
+   DATABASE_URL=postgresql://user:password@host:5432/dbname
+   GEMINI_API_KEY=your_gemini_api_key
+   PORT=3001
+   ```
+
 3. Run the app:
    `npm run dev`
+
+## Deploy dengan Docker
+
+```bash
+docker compose up -d --build
+```
+
+Aplikasi akan berjalan di port 3001.

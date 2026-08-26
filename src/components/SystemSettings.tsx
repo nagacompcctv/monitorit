@@ -378,7 +378,7 @@ export default function SystemSettings({ activeTabFromProps }: SystemSettingsPro
                     onChange={e => setGeminiKey(e.target.value)}
                     className="w-full bg-gray-50 border border-gray-100 rounded-xl py-3 px-5 text-xs font-medium outline-none focus:border-amber-500 transition-all font-sans"
                   />
-                  <p className="text-[9px] text-gray-400 ml-1 mt-2">Dapatkan API Key dari Google AI Studio. Hash ini disimpan secara lokal di perangkat Anda.</p>
+                  <p className="text-[9px] text-gray-400 ml-1 mt-2">Dapatkan API Key dari Google AI (aistudio.google.com). Hash ini disimpan secara lokal di perangkat Anda.</p>
                 </div>
 
                 <div className="pt-2 flex items-center justify-end">
