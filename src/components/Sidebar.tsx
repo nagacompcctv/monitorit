@@ -37,13 +37,9 @@ export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
 
   if (!isStaffSoftware && !isStaffHardware && !isSupervisor && !isManager) {
     menuItems.push({
-      id: "ringkasan_group",
+      id: "dashboard",
       label: "Ringkasan",
       icon: LayoutDashboard,
-      subMenu: [
-        { id: "dashboard", label: "DASHBOARD UTAMA" },
-        { id: "ringkasan-aset-it", label: "RINGKASAN ASET IT" },
-      ],
     });
   }
 

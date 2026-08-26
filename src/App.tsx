@@ -15,7 +15,6 @@ import { User, UserRole } from "./types";
 import ServerMonitoring from "./components/ServerMonitoring";
 import BusinessProcessTeam from "./components/BusinessProcessTeam";
 import Dashboard from "./components/Dashboard";
-import RingkasanAsetIT from "./components/RingkasanAsetIT";
 import Sidebar from "./components/Sidebar";
 import Timeline from "./components/Timeline";
 import Assets from "./components/Assets";
@@ -312,7 +311,6 @@ export default function App() {
             >
               <Layout>
                 {activeTab === "dashboard" && !isStaffSoftware && !isStaffHardware && !isSupervisor && !isManager && <Dashboard />}
-                {activeTab === "ringkasan-aset-it" && !isStaffSoftware && !isStaffHardware && !isSupervisor && !isManager && <RingkasanAsetIT />}
                 {activeTab === "timeline" && <Timeline />}
                 {activeTab === "reports" && <DailyReports />}
                 {activeTab === "server-monitoring" && !isStaffSoftware && !isSupervisor && !isManager && <ServerMonitoring />}
